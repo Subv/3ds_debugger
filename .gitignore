@@ -1,0 +1,6 @@
+*/build/*
+*/output/*
+*/buildtools/*
+*.elf
+*.3dsx
+*.cia
