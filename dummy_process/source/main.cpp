@@ -10,6 +10,8 @@
 
 #define fprintf(...) { u8* variable_name(savedbuff) = my_printf_guard(); fprintf(__VA_ARGS__); my_printf_restore(variable_name(savedbuff)); }
 
+#define fflush(...) { u8* variable_name(savedbuff2) = my_printf_guard(); fflush(__VA_ARGS__); my_printf_restore(variable_name(savedbuff2)); }
+
 u8* my_printf_guard() {
     // Saves the contents of the TLS command buffer and returns them in a variable
     // The caller is responsible for the management of the returned memory.
@@ -34,11 +36,11 @@ enum CommandIds {
 };
 
 int main(int argc, const char* argv[]) {
-    sdmcInit();
     FILE* log_file = fopen("service_log.log", "a");
 
     Handle handles[] = { 0 /* Server port */, 0 /* Server session */};
     bool shutdown = false;
+    bool write_debugstr = false;
     s32 index = 0;
     int num_handles = 1;
     
@@ -57,15 +59,24 @@ int main(int argc, const char* argv[]) {
 
     cmd_buff[0] = 0xFFFF0000;
     do {
-        fprintf(log_file, "Command1: %08X\n", cmd_buff[0]);
-        fprintf(log_file, "Command2: %08X\n", cmd_buff[0]);
         Result result = svcReplyAndReceive(&index, handles, shutdown ? 0 : num_handles, handles[1]);
-        fprintf(log_file, "Command3: %08X\n", cmd_buff[0]);
 
         fprintf(log_file, "ReplyAndReceive returned index %08X shutting down: %s\n", index, shutdown ? "yes" : "no");
 
         if (shutdown)
             break;
+
+        fflush(log_file);
+
+        if (write_debugstr) {
+            fprintf(log_file, "Writing an output debug string\n");
+            const char* text = "DEBUG TEXT";
+            svcOutputDebugString(text, strlen(text));
+            fprintf(log_file, "Written an output debug string\n");
+            write_debugstr = false;
+        }
+
+        fflush(log_file);
 
         if (result != 0) {
             fprintf(log_file, "svcReplyAndReceive error: %08X\n", (u32)result);
@@ -87,6 +98,7 @@ int main(int argc, const char* argv[]) {
                 }
                 fprintf(log_file, "Accepted a new session\n");
                 num_handles++;
+                fflush(log_file);
                 break;
             case 1: { // The ServerSession was signaled
                 // Handle the command
@@ -96,14 +108,25 @@ int main(int argc, const char* argv[]) {
                         fprintf(log_file, "Hello, received %08X\n", cmd_buff[1]);
                         cmd_buff[0] = IPC_MakeHeader(HELLO_COMMAND_ID, 1, 0);
                         cmd_buff[1] = 0x0000BABE;
+                        fflush(log_file);
                         break;
+                    case OUTPUT_STR_COMMAND_ID: {
+                        fprintf(log_file, "Preparing to write an output debug string\n");
+                        cmd_buff[0] = IPC_MakeHeader(OUTPUT_STR_COMMAND_ID, 1, 0);
+                        cmd_buff[1] = 0x12345678;
+                        write_debugstr = true;
+                        fflush(log_file);
+                        break;
+                    }
                     case SHUTDOWN_COMMAND_ID:
                         fprintf(log_file, "Shutting down the server.\n");
                         cmd_buff[0] = IPC_MakeHeader(SHUTDOWN_COMMAND_ID, 0, 0);
                         shutdown = true;
+                        fflush(log_file);
                         break;
                     default:
                         fprintf(log_file, "Unknown command %08X\n", command);
+                        fflush(log_file);
                         break;
                 }
                 break;
@@ -116,6 +139,9 @@ int main(int argc, const char* argv[]) {
 
     fprintf(log_file, "Exiting process\n");
 
+    svcCloseHandle(handles[0]);
+    svcCloseHandle(handles[1]);
+    
     cleanup:
     srvUnregisterService("tst:srv");
 
@@ -123,7 +149,5 @@ int main(int argc, const char* argv[]) {
     if (log_file)
         fclose(log_file);
 
-    sdmcExit();
-    svcExitProcess();
     return 0;
 }
