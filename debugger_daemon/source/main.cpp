@@ -4,8 +4,8 @@
 
 #include <fmt/format.h>
 
-#include "network_manager.h"
 #include "logger.h"
+#include "network_manager.h"
 
 const int DebuggerPort = 1234;
 
