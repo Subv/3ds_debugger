@@ -1,0 +1,4 @@
+[submodule "externals/fmtlib"]
+	path = externals/fmtlib
+	url = https://github.com/fmtlib/fmt.git
+	branch = master

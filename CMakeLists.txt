@@ -28,6 +28,10 @@ if (NOT BANNERTOOL)
     endif()
 endif()
 
+# Add the libfmt library
+set(HAVE_OPEN OFF) # Disable the POSIX layer in fmtlib
+add_subdirectory(externals/fmtlib)
+
 if (BUILD_DUMMY_PROC)
     add_subdirectory(dummy_process)
 endif()

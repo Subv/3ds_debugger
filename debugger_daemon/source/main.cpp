@@ -2,6 +2,8 @@
 
 #include <3ds.h>
 
+#include <fmt/format.h>
+
 #include "network_manager.h"
 #include "logger.h"
 
@@ -13,19 +15,19 @@ int main(int argc, const char* argv[]) {
     Logger::Log("Initializing daemon");
     NetworkManager network;
 
-    Logger::Log("Waiting for connection on port %u", DebuggerPort);
-    network->Listen(DebuggerPort);
+    Logger::Log(fmt::format("Waiting for connection on port {}", DebuggerPort));
+    network.Listen(DebuggerPort);
 
     // TODO(Subv): The following code should be in a loop,
     // we don't want the debugger to exit after the first client disconnects
-    network->Accept();
+    network.Accept();
 
-    Logger::Log("Client connected from IP: %s", network->GetClientIPStr().c_str());
+    Logger::Log(fmt::format("Client connected from IP: {}", network.GetClientIPStr()));
 
-    while (network->IsClientConnected()) {
-        std::string command = network->ReceiveCommand();
-        Logger::Log("Received command %s", command.c_str());
-        network->SendReply("Received %s\n", command.c_str());
+    while (network.IsClientConnected()) {
+        std::string command = network.ReceiveCommand();
+        Logger::Log(fmt::format("Received command {}", command));
+        network.SendReply(fmt::format("Received {}\n", command));
     }
 
     Logger::Finalize();

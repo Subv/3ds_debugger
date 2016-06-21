@@ -1,6 +1,7 @@
 */build/*
 build/*
 bin/*
+tools/*
 */output/*
 */buildtools/*
 *.elf

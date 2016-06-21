@@ -42,5 +42,5 @@ public:
      * Sends a network packet to the connected client,
      * consisting of an u32 with the length of the string, and then the string.
      */
-    void SendReply(std::string command);
+    void SendReply(const std::string& command);
 };
