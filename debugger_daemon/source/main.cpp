@@ -1,3 +1,4 @@
+#include <memory>
 #include <string>
 
 #include <3ds.h>
@@ -13,10 +14,10 @@ int main(int argc, const char* argv[]) {
     Logger::Initialize();
 
     Logger::Log("Initializing daemon");
-    NetworkManager network;
+    // std::unique_ptr<NetworkManager> network(new NetworkManager);
 
-    Logger::Log(fmt::format("Waiting for connection on port {}", DebuggerPort));
-    network.Listen(DebuggerPort);
+    //Logger::Log(fmt::format("Waiting for connection on port {}", DebuggerPort));
+    /*network.Listen(DebuggerPort);
 
     // TODO(Subv): The following code should be in a loop,
     // we don't want the debugger to exit after the first client disconnects
@@ -29,7 +30,7 @@ int main(int argc, const char* argv[]) {
         Logger::Log(fmt::format("Received command {}", command));
         network.SendReply(fmt::format("Received {}\n", command));
     }
-
+    */
     Logger::Finalize();
     return 0;
 }

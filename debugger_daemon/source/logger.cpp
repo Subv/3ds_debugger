@@ -2,6 +2,7 @@
 #include <ctime>
 
 #include <fmt/format.h>
+#include <fmt/time.h>
 
 #include "logger.h"
 #include "utils.h"
@@ -19,8 +20,8 @@ static std::FILE* log_file = nullptr;
  * YYYY-MM-DD HH:mm:ss
  */
 static std::string GetCurrentDateTime() {
-    // TODO(Subv): Implement this
-    return "";
+    std::time_t time = std::time(nullptr);
+    return ""; //fmt::format("{:%Y-%m-%d %H:%M:%s}.", *std::localtime(&time));
 }
 
 void Initialize() {
@@ -38,6 +39,7 @@ void Finalize() {
 void Log(const std::string& message) {
     ASSERT(log_file != nullptr);
     std::fprintf(log_file, "%s\n", message.c_str());
+    std::fflush(log_file);
 }
 
 }

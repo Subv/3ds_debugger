@@ -2,6 +2,7 @@ set(SOURCE_FILES
     source/logger.cpp
     source/main.cpp
     source/network_manager.cpp
+    source/system.c
 )
 
 set(HEADER_FILES
