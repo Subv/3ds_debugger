@@ -121,9 +121,6 @@ void DebuggingThread(void* arg) {
                 printf("Disabling breakpoint\n");
                 svcSetHardwareBreakpoint(1, 0, 0);
                 svcSetHardwareBreakpoint(4, 0, 0);
-                svcBackdoor(ExecuteKernelBarriers);
-                //u32 virtual_address = 0x1031F4;
-                //svcSetHardwareBreakpoint(1, vaddr_bp_control, virtual_address);
 
                 ThreadContext context;
                 result = svcGetDebugThreadContext(&context, debugger_handle, info.thread_id, 3);
